@@ -70,7 +70,7 @@ define(function() {
         return (function () {
             var _that = this;
             var _fn = fn;
-            var _args = [];//arguments.slice(1, arguments.length - 1);
+            var _args = [];//Array.prototype.slice(arguments, 1, arguments.length - 1);
             for (var i = 1, count = arguments.length; i < count; i++) {
                 _args.push(arguments[i]);
             }
@@ -88,7 +88,21 @@ define(function() {
     },
 
     curryIt : function(fn) {
-        
+        return (function() {
+            var _that = this;
+            var _fn = fn;
+            var _args = [];
+            function curry() {
+                _args.push.apply(_args, arguments);
+                //curry.length = arguments.length;
+                return (_args.length === 3) ? _fn.apply(_that, _args) : curry;
+            }
+            var args = [];//Array.prototype.slice(arguments, 1, arguments.length - 1);
+            for (var i = 1, count = arguments.length; i < count; i++) {
+                args.push(arguments[i]);
+            }
+            return curry.apply(this, args);
+        })(this, arguments);
     }
   };
 });
