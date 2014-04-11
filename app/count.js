@@ -6,7 +6,7 @@ define(function () {
         this._current = -1;
         this._running = false;
         this._handler = null;
-    );
+    };
 
     counter.prototype.count = function (start, end) {
         this._running = true;
@@ -27,6 +27,6 @@ define(function () {
         this._running = false;
         clearInterval(this._handler);
     };
-            
+    
     return new counter();
 });
