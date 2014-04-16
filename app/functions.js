@@ -1,6 +1,32 @@
 if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
 define(function() {
+
+    function curry(func,args,space) {
+        var n  = func.length - args.length; //arguments still to come
+        var sa = Array.prototype.slice.apply(args); // saved accumulator array
+        function accumulator(moreArgs,sa,n) {
+            var saPrev = sa.slice(0); // to reset
+            var nPrev  = n; // to reset
+            for(var i=0;i<moreArgs.length;i++,n--) {
+                sa[sa.length] = moreArgs[i];
+            }
+            if ((nPrev-moreArgs.length)<=0) { // fix
+                var res = func.apply(space,sa);
+                // reset vars, so curried function can be applied to new params.
+                sa = saPrev;
+                n  = nPrev;
+                return res;
+            } else {
+                return function (a/*because you want it*/){
+                    // arguments are params, so closure bussiness is avoided.
+                    return accumulator(arguments,sa.slice(0),n);
+                }
+            }
+        }
+        return accumulator([],sa,n);
+    };
+
   return {
     argsAsArray : function(fn, arr) {
         if (typeof fn === 'function' && typeof arr === 'object') {
@@ -88,21 +114,11 @@ define(function() {
     },
 
     curryIt : function(fn) {
-        return (function() {
-            var _that = this;
-            var _fn = fn;
-            var _args = [];
-            function curry() {
-                _args.push.apply(_args, arguments);
-                //curry.length = arguments.length;
-                return (_args.length === 3) ? _fn.apply(_that, _args) : curry;
-            }
-            var args = [];//Array.prototype.slice(arguments, 1, arguments.length - 1);
-            for (var i = 1, count = arguments.length; i < count; i++) {
-                args.push(arguments[i]);
-            }
-            return curry.apply(this, args);
-        })(this, arguments);
+
+        if (arguments.length < fn.length) {
+            return curry(fn, [], this);
+        }
+        return fn.apply(this, arguments);
     }
   };
 });
